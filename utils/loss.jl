@@ -1,12 +1,18 @@
+module loss
+    function log_loss(Ŷ, Y)
+        m = size(Y, 2)
+        epsilon = eps(1.0)
 
-function log_loss(Ŷ, Y)
-    m = size(Y, 2)
-    epsilon = eps(1.0)
+        # Deal with log(0) scenarios
+        Ŷ_new = [max(i, epsilon) for i in Ŷ]
+        Ŷ_new = [min(i, 1-epsilon) for i in Ŷ_new]
 
-    # Deal with log(0) scenarios
-    Ŷ_new = [max(i, epsilon) for i in Ŷ]
-    Ŷ_new = [min(i, 1-epsilon) for i in Ŷ_new]
+        cost = -sum(Y .* log.(Ŷ_new) + (1 .- Y) .* log.(1 .- Ŷ_new)) / m
+        return cost
+    end
 
-    cost = -sum(Y .* log.(Ŷ_new) + (1 .- Y) .* log.(1 .- Ŷ_new)) / m
-    return cost
+    function accuracy(Ŷ , Y)
+        @assert size(Ŷ) == size(Y)
+        return sum((Ŷ .> 0.5) .== Y) / length(Y)
+    end
 end
